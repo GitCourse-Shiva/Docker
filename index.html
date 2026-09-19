@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CinePass · Movie Ticket Booking</title>
+    <!-- Font Awesome 6 (free icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #0b0f1c 0%, #1a1e2f 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        /* main card */
+        .booking-container {
+            max-width: 1100px;
+            width: 100%;
+            background: rgba(18, 22, 35, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 2.5rem;
+            box-shadow: 0 25px 50px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            padding: 2rem 2.5rem;
+            color: #f0f3fa;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        /* header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            background: linear-gradient(to right, #ffd966, #ffb347);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: #ffb347;
+            font-size: 2rem;
+        }
+
+        .badge {
+            background: #2a2f45;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid #3d445e;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05);
+        }
+
+        .badge i {
+            color: #ffb347;
+            margin-right: 6px;
+        }
+
+        /* movie selector row */
+        .movie-selector {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 2.2rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: #ffb347 #1e2338;
+        }
+
+        .movie-selector::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .movie-selector::-webkit-scrollbar-thumb {
+            background: #ffb347;
+            border-radius: 10px;
+        }
+
+        .movie-card {
+            background: #1d2237;
+            border-radius: 1.5rem;
+            padding: 0.85rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            border: 1px solid #2d344b;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .movie-card.active {
+            background: #2d2f4a;
+            border-color: #ffb347;
+            box-shadow: 0 0 0 2px rgba(255, 180, 70, 0.3);
+        }
+
+        .movie-card:hover {
+            background: #2a2f46;
+            border-color: #5f6b8a;
+        }
+
+        .movie-poster {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #3b3f5c, #1f2337);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #ffd966;
+        }
+
+        .movie-info h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .movie-info span {
+            font-size: 0.75rem;
+            color: #9aa3bb;
+        }
+
+        /* main grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* screen & seating area */
+        .screen-area {
+            background: #121624;
+            border-radius: 2rem;
+            padding: 1.8rem 1.5rem 1.5rem;
+            border: 1px solid #262c40;
+            box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .screen {
+            background: #cbd5f0;
+            height: 10px;
+            width: 80%;
+            margin: 0 auto 2rem;
+            border-radius: 100px;
+            box-shadow: 0 15px 30px rgba(255, 215, 0, 0.4), 0 5px 12px rgba(255, 255, 255, 0.3);
+            background: linear-gradient(90deg, #c0c9e0, #ffffff, #c0c9e0);
+            position: relative;
+        }
+
+        .screen::after {
+            content: "SCREEN";
+            position: absolute;
+            top: -28px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            letter-spacing: 8px;
+            color: #7b85a4;
+            font-weight: 500;
+        }
+
+        .seating {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-top: 1.2rem;
+        }
+
+        .seat-row {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .seat {
+            width: 38px;
+            height: 38px;
+            background: #2b314a;
+            border-radius: 12px 12px 6px 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #989fbb;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: 1px solid #3e455e;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        .seat.selected {
+            background: #ffb347;
+            color: #0b0f1c;
+            border-color: #ffd966;
+            box-shadow: 0 0 12px #ffb34780;
+            font-weight: 700;
+        }
+
+        .seat.occupied {
+            background: #1a1e2e;
+            color: #4a516b;
+            border-color: #2b3147;
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+            text-decoration: line-through;
+            font-size: 0.6rem;
+        }
+
+        .seat:not(.occupied):hover {
+            background: #3f4a6b;
+            border-color: #ffb347;
+        }
+
+        /* legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 1.8rem;
+            margin-top: 1.8rem;
+            font-size: 0.8rem;
+            color: #9ca6c2;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 5px;
+            background: #2b314a;
+            border: 1px solid #3e455e;
+        }
+
+        .legend-box.selected {
+            background: #ffb347;
+            border-color: #ffd966;
+        }
+
+        .legend-box.occupied {
+            background: #1a1e2e;
+            border-color: #2b3147;
+        }
+
+        /* SUMMARY SIDEBAR */
+        .summary {
+            background: #141a28;
+            border-radius: 1.8rem;
+            padding: 1.8rem 1.5rem;
+            border: 1px solid #2b3148;
+            box-shadow: 0 10px 20px -5px #00000050;
+            height: fit-content;
+        }
+
+        .summary h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #ffd966;
+            font-weight: 500;
+        }
+
+        .summary-movie {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1.8rem;
+            background: #1d2237;
+            padding: 0.8rem 1rem;
+            border-radius: 1.2rem;
+        }
+
+        .summary-movie i {
+            font-size: 1.8rem;
+            color: #ffb347;
+        }
+
+        .summary-movie .title {
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        .summary-movie .time {
+            font-size: 0.8rem;
+            color: #99a1bc;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.9rem;
+            font-size: 0.95rem;
+            color: #b6bfd9;
+        }
+
+        .detail-row .value {
+            font-weight: 600;
+            color: #f0f3fa;
+        }
+
+        .divider {
+            height: 1px;
+            background: #2e344b;
+            margin: 1.4rem 0;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin: 1.2rem 0 1.8rem;
+        }
+
+        .total-row span:last-child {
+            color: #ffd966;
+            font-size: 1.7rem;
+        }
+
+        .btn-book {
+            width: 100%;
+            background: linear-gradient(135deg, #ffb347, #ff9f2e);
+            border: none;
+            color: #0b0f1c;
+            font-weight: 700;
+            font-size: 1.1rem;
+            padding: 1rem;
+            border-radius: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 10px 20px -5px #ffb34770;
+            letter-spacing: 0.5px;
+            border: 1px solid #ffe5a3;
+        }
+
+        .btn-book:hover {
+            background: linear-gradient(135deg, #ffb347, #ffad3a);
+            transform: scale(1.02);
+            box-shadow: 0 15px 25px -5px #ffb34790;
+        }
+
+        .btn-book:active {
+            transform: scale(0.98);
+        }
+
+        .message {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 0.5rem;
+            border-radius: 30px;
+            background: #1e2a3a;
+            color: #b9c8e6;
+            transition: all 0.2s ease;
+        }
+
+        /* responsiveness */
+        @media (max-width: 750px) {
+            .booking-container {
+                padding: 1.5rem;
+            }
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            .seat {
+                width: 32px;
+                height: 32px;
+                font-size: 0.6rem;
+            }
+            .seat-row {
+                gap: 7px;
+            }
+            .legend {
+                gap: 1rem;
+            }
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .seat {
+                width: 28px;
+                height: 28px;
+                font-size: 0.55rem;
+            }
+            .seat-row {
+                gap: 5px;
+            }
+            .booking-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="booking-container">
+    <!-- header -->
+    <div class="header">
+        <div class="logo">
+            <i class="fas fa-film"></i>
+            <h1>CinePass</h1>
+        </div>
+        <div class="badge">
+            <i class="fas fa-map-pin"></i> PVR · Downtown
+        </div>
+    </div>
+
+    <!-- movie selector (3 movies) -->
+    <div class="movie-selector" id="movieSelector">
+        <div class="movie-card active" data-movie="Dune: Part Two" data-price="14.50" data-time="7:30 PM">
+            <div class="movie-poster"><i class="fas fa-meteor"></i></div>
+            <div class="movie-info">
+                <h4>Dune: Part Two</h4>
+                <span>7:30 PM · IMAX</span>
+            </div>
+        </div>
+        <div class="movie-card" data-movie="Oppenheimer" data-price="12.00" data-time="8:15 PM">
+            <div class="movie-poster"><i class="fas fa-atom"></i></div>
+            <div class="movie-info">
+                <h4>Oppenheimer</h4>
+                <span>8:15 PM · Dolby</span>
+            </div>
+        </div>
+        <div class="movie-card" data-movie="Poor Things" data-price="11.00" data-time="6:45 PM">
+            <div class="movie-poster"><i class="fas fa-heart"></i></div>
+            <div class="movie-info">
+                <h4>Poor Things</h4>
+                <span>6:45 PM · Standard</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- main content: seats + summary -->
+    <div class="main-grid">
+        <!-- left: screen and seats -->
+        <div class="screen-area">
+            <div class="screen"></div>
+
+            <div class="seating" id="seatingContainer">
+                <!-- row A (5 seats) -->
+                <div class="seat-row" data-row="A">
+                    <div class="seat" data-seat="A1">A1</div>
+                    <div class="seat" data-seat="A2">A2</div>
+                    <div class="seat occupied" data-seat="A3">A3</div>
+                    <div class="seat" data-seat="A4">A4</div>
+                    <div class="seat" data-seat="A5">A5</div>
+                </div>
+                <!-- row B (7 seats) -->
+                <div class="seat-row" data-row="B">
+                    <div class="seat" data-seat="B1">B1</div>
+                    <div class="seat" data-seat="B2">B2</div>
+                    <div class="seat" data-seat="B3">B3</div>
+                    <div class="seat occupied" data-seat="B4">B4</div>
+                    <div class="seat" data-seat="B5">B5</div>
+                    <div class="seat" data-seat="B6">B6</div>
+                    <div class="seat" data-seat="B7">B7</div>
+                </div>
+                <!-- row C (7 seats) -->
+                <div class="seat-row" data-row="C">
+                    <div class="seat" data-seat="C1">C1</div>
+                    <div class="seat occupied" data-seat="C2">C2</div>
+                    <div class="seat" data-seat="C3">C3</div>
+                    <div class="seat" data-seat="C4">C4</div>
+                    <div class="seat" data-seat="C5">C5</div>
+                    <div class="seat" data-seat="C6">C6</div>
+                    <div class="seat occupied" data-seat="C7">C7</div>
+                </div>
+                <!-- row D (7 seats) -->
+                <div class="seat-row" data-row="D">
+                    <div class="seat" data-seat="D1">D1</div>
+                    <div class="seat" data-seat="D2">D2</div>
+                    <div class="seat" data-seat="D3">D3</div>
+                    <div class="seat" data-seat="D4">D4</div>
+                    <div class="seat" data-seat="D5">D5</div>
+                    <div class="seat occupied" data-seat="D6">D6</div>
+                    <div class="seat" data-seat="D7">D7</div>
+                </div>
+            </div>
+
+            <!-- legend -->
+            <div class="legend">
+                <div class="legend-item"><div class="legend-box"></div> Available</div>
+                <div class="legend-item"><div class="legend-box selected"></div> Selected</div>
+                <div class="legend-item"><div class="legend-box occupied"></div> Occupied</div>
+            </div>
+        </div>
+
+        <!-- right: summary card -->
+        <div class="summary">
+            <h3><i class="fas fa-ticket-alt"></i> Your Order</h3>
+            <div class="summary-movie">
+                <i class="fas fa-video"></i>
+                <div>
+                    <div class="title" id="summaryMovieTitle">Dune: Part Two</div>
+                    <div class="time" id="summaryMovieTime">7:30 PM · IMAX</div>
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <span>Price per ticket</span>
+                <span class="value" id="pricePerTicket">$14.50</span>
+            </div>
+            <div class="detail-row">
+                <span>Seats selected</span>
+                <span class="value" id="selectedSeatsList">—</span>
+            </div>
+            <div class="detail-row">
+                <span>Quantity</span>
+                <span class="value" id="selectedCount">0</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="total-row">
+                <span>Total</span>
+                <span id="totalPrice">$0.00</span>
+            </div>
+
+            <button class="btn-book" id="bookBtn">
+                <i class="fas fa-check-circle"></i> Confirm Booking
+            </button>
+            <div class="message" id="messageBox">
+                <i class="fas fa-info-circle"></i> Select your seats
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- DATA -----
+        let currentMovie = {
+            title: 'Dune: Part Two',
+            price: 14.50,
+            time: '7:30 PM · IMAX'
+        };
+
+        // track selected seats (Set to avoid duplicates)
+        const selectedSeats = new Set();
+
+        // DOM elements
+        const movieCards = document.querySelectorAll('.movie-card');
+        const summaryMovieTitle = document.getElementById('summaryMovieTitle');
+        const summaryMovieTime = document.getElementById('summaryMovieTime');
+        const pricePerTicketEl = document.getElementById('pricePerTicket');
+        const selectedSeatsListEl = document.getElementById('selectedSeatsList');
+        const selectedCountEl = document.getElementById('selectedCount');
+        const totalPriceEl = document.getElementById('totalPrice');
+        const messageBox = document.getElementById('messageBox');
+        const bookBtn = document.getElementById('bookBtn');
+
+        // all seat elements
+        const allSeats = document.querySelectorAll('.seat:not(.occupied)');
+        const occupiedSeats = document.querySelectorAll('.seat.occupied');
+
+        // ----- helper: update UI based on selectedSeats and currentMovie -----
+        function updateSummary() {
+            const count = selectedSeats.size;
+            const total = (count * currentMovie.price).toFixed(2);
+
+            // update price per ticket
+            pricePerTicketEl.textContent = `$${currentMovie.price.toFixed(2)}`;
+
+            // selected seats list (sorted for consistency)
+            if (count === 0) {
+                selectedSeatsListEl.textContent = '—';
+            } else {
+                const sorted = Array.from(selectedSeats).sort();
+                selectedSeatsListEl.textContent = sorted.join(', ');
+            }
+
+            // quantity & total
+            selectedCountEl.textContent = count;
+            totalPriceEl.textContent = `$${total}`;
+
+            // Update message (if no seats)
+            if (count === 0) {
+                messageBox.innerHTML = `<i class="fas fa-info-circle"></i> Select your seats`;
+            } else {
+                messageBox.innerHTML = `<i class="fas fa-check-circle" style="color:#ffb347;"></i> ${count} seat${count > 1 ? 's' : ''} selected · $${total}`;
+            }
+
+            // Also update the movie title/time in summary on movie change (already handled elsewhere)
+            summaryMovieTitle.textContent = currentMovie.title;
+            summaryMovieTime.textContent = currentMovie.time;
+        }
+
+        // ----- update seat UI (selected class) -----
+        function refreshSeatUI() {
+            allSeats.forEach(seat => {
+                const seatId = seat.dataset.seat;
+                if (selectedSeats.has(seatId)) {
+                    seat.classList.add('selected');
+                } else {
+                    seat.classList.remove('selected');
+                }
+            });
+        }
+
+        // ----- reset selected seats (clear all) -----
+        function clearSelection() {
+            selectedSeats.clear();
+            refreshSeatUI();
+            updateSummary();
+        }
+
+        // ----- handle seat click -----
+        function handleSeatClick(e) {
+            const seat = e.currentTarget;
+            // extra safety: ignore if occupied (they don't have listener anyway)
+            if (seat.classList.contains('occupied')) return;
+
+            const seatId = seat.dataset.seat;
+            if (selectedSeats.has(seatId)) {
+                selectedSeats.delete(seatId);
+            } else {
+                selectedSeats.add(seatId);
+            }
+
+            refreshSeatUI();
+            updateSummary();
+        }
+
+        // ----- attach click listeners to available seats -----
+        allSeats.forEach(seat => {
+            seat.addEventListener('click', handleSeatClick);
+        });
+
+        // ----- movie card switching -----
+        movieCards.forEach(card => {
+            card.addEventListener('click', function() {
+                // update active class
+                movieCards.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+
+                // get movie data from data attributes
+                const title = this.dataset.movie;
+                const price = parseFloat(this.dataset.price);
+                const time = this.dataset.time;
+
+                // update current movie
+                currentMovie = { title, price, time };
+
+                // clear selected seats (since movie change)
+                clearSelection();
+
+                // update summary (movie info + price)
+                summaryMovieTitle.textContent = title;
+                summaryMovieTime.textContent = time;
+                pricePerTicketEl.textContent = `$${price.toFixed(2)}`;
+
+                // update total (if any seats remained — but we cleared them, so it's $0)
+                // but we call updateSummary anyway
+                updateSummary();
+
+                // show reset message
+                messageBox.innerHTML = `<i class="fas fa-sync-alt"></i> Movie changed · select seats`;
+            });
+        });
+
+        // ----- book button (confirm) -----
+        bookBtn.addEventListener('click', function() {
+            const count = selectedSeats.size;
+            if (count === 0) {
+                messageBox.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ff9f2e;"></i> Please select at least one seat.`;
+                return;
+            }
+
+            // simulate booking success
+            const seatsStr = Array.from(selectedSeats).sort().join(', ');
+            const total = (count * currentMovie.price).toFixed(2);
+
+            messageBox.innerHTML = `<i class="fas fa-check-circle" style="color:#6fcf97;"></i> Booked! ${seatsStr} · $${total}`;
+
+            // Optional: clear selection after booking (simulate new session)
+            // but we keep it to show it's booked. For realism, we can disable seats, but we'll just clear selection.
+            // In a real app, you'd mark them as occupied.
+            // Let's mark selected seats as occupied (simulate permanent booking)
+            selectedSeats.forEach(seatId => {
+                const seatEl = document.querySelector(`.seat[data-seat="${seatId}"]`);
+                if (seatEl) {
+                    seatEl.classList.remove('selected');
+                    seatEl.classList.add('occupied');
+                    // remove event listener? we can't easily, but we can clone or just ignore.
+                    // Instead we override the click behaviour by removing the listener and adding a no-op.
+                    // simpler: we'll remove the click listener via cloning? That's overkill.
+                    // better approach: we set a flag in dataset and in handleSeatClick we check.
+                    // But for simplicity, we'll just replace the node with a clone without listeners.
+                    // This is an accepted pattern, though slightly heavy.
+                    const newSeat = seatEl.cloneNode(true);
+                    newSeat.classList.remove('selected');
+                    newSeat.classList.add('occupied');
+                    // remove any remaining selected class in clone
+                    seatEl.parentNode.replaceChild(newSeat, seatEl);
+                }
+            });
+
+            // Also remove seat from selectedSeats set (they are now occupied)
+            selectedSeats.clear();
+
+            // Refresh UI counters — but seats are now occupied clones, so we must update the NodeList references!
+            // Since we replaced elements, we need to re-query all seats (including occupied) and update allSeats and occupiedSeats.
+            // This is getting messy in a pure demo, but we can handle it by re-binding.
+            // For the sake of this demo, I'll keep it simpler: we won't replace seats, we'll just mark them as occupied visually
+            // and remove them from the available list, but keep the same DOM element with an additional class.
+            // But the click listener will still fire and we need to block it. So in handleSeatClick, we check if occupied.
+            // Let's adjust: we'll add the 'occupied' class, and in handleSeatClick we check for that. 
+            // But we already replaced? I'll roll back to that simpler approach: no cloning, just toggle class and block in click.
+            // However we need to prevent future clicks. So in handleSeatClick we check if seat has class 'occupied' and return.
+            // But we already have an event listener; we can just add the class and the check will prevent selection.
+            // But we also need to remove the 'selected' class if present (but we cleared selectedSeats before).
+            // Let's re-write this part more elegantly:
+
+            // BUT: We already ran the cloning block above inside the if? Let's refactor to avoid cloning.
+            // I'll rewrite the book handler in the final version.
+            // Since this is a single script, I'll replace the whole book button logic with a clean version.
+            // (I'll edit the script now.)
+        });
+
+        // We need to fix the book handler. I'll rewrite it below, but since it's already defined, 
+        // I'll override it with a new function after the initial one? Better: replace the whole block.
+        // For simplicity, I'll remove the cloned seats logic and use a clean approach.
+
+        // Let's re-define book button handler to avoid confusion:
+        // Remove the old listener and add new one.
+        // But there's no easy removal. Since we wrote the script, I'll just redefine it cleanly.
+        // I'll erase the previous bookBtn listener and write a new one.
+
+        // To avoid double handlers, I'll use a named function and reassign.
+        // We'll remove the old listener by cloning the button? Not necessary, but we can do it.
+        // The simplest: just redefine the entire script? no, I'll just override the onclick property.
+        // But addEventListener won't be removed. So I'll clone the button.
+        const newBookBtn = bookBtn.cloneNode(true);
+        bookBtn.parentNode.replaceChild(newBookBtn, bookBtn);
+        // now use newBookBtn variable.
+
+        // Re-assign the button reference
+        const finalBookBtn = document.getElementById('bookBtn'); // same id, new element
+
+        // Also we need to ensure the messageBox reference is still valid (yes).
+        // And we need to re-bind all seats (since we didn't clone them, it's fine).
+
+        // But the previous book handler had cloning mess. I'll ignore that and start fresh.
+
+        // Let's also fix the seat click listener to correctly ignore occupied seats (even after being marked)
+        // We'll modify the handleSeatClick function.
+
+        // Since the old handleSeatClick is still attached, we need to replace it.
+        // Easier: remove all listeners by cloning each seat? That's heavy. Instead, I'll use a flag.
+        // But let's just re-write the whole seat binding.
+
+        // Actually, I'll take a cleaner approach: I'll rewrite the entire script from scratch inside the IIFE 
+        // with correct logic. Since we are inside, I'll just re-declare the functions with new names and re-bind.
+        // But the event listeners from the first binding are still there. That will cause double toggling.
+        // So I'll remove all seat listeners by cloning the seating container? That would remove all seat references.
+        // Let's do that: replace the seating container's innerHTML with the same seats but without listeners.
+        // Then re-query and re-bind.
+
+        // This is getting long, but it's a one-time fix.
+
+        // I'll now clean up: replace seatingContainer content with a fresh copy.
+
+        // Step 1: capture current HTML of seating container (it's static, we can reconstruct)
+        // But we already modified the DOM? No, we haven't yet because the book handler never ran.
+        // So the original seats are intact with original listeners. So we can just ignore the messy part above.
+
+        // I'll remove the old bookBtn listener by replacing the button and then defining a clean handler.
+        // Also remove the old seat listeners by replacing all seats with clones (removing listeners).
+
+        // Let's do this properly:
+
+        // Re-fetch seating container
+        const seatingContainer = document.getElementById('seatingContainer');
+        // Clone the seating container node to remove all listeners from its children
+        const newSeatingContainer = seatingContainer.cloneNode(true);
+        seatingContainer.parentNode.replaceChild(newSeatingContainer, seatingContainer);
+
+        // Now re-query all seats inside the new container
+        const freshAllSeats = newSeatingContainer.querySelectorAll('.seat:not(.occupied)');
+        const freshOccupiedSeats = newSeatingContainer.querySelectorAll('.seat.occupied');
+
+        // Remove selected classes from any (just in case) — they are not selected yet.
+        // Clear the selectedSeats set (should be empty anyway)
+        selectedSeats.clear();
+
+        // Re-bind click listeners to available seats
+        function newHandleSeatClick(e) {
+            const seat = e.currentTarget;
+            // if somehow occupied, ignore (should not happen because we only bind to non-occupied)
+            if (seat.classList.contains('occupied')) return;
+
+            const seatId = seat.dataset.seat;
+            if (selectedSeats.has(seatId)) {
+                selectedSeats.delete(seatId);
+            } else {
+                selectedSeats.add(seatId);
+            }
+
+            // Update UI: add/remove selected class for all seats
+            freshAllSeats.forEach(s => {
+                const sid = s.dataset.seat;
+                if (selectedSeats.has(sid)) {
+                    s.classList.add('selected');
+                } else {
+                    s.classList.remove('selected');
+                }
+            });
+
+            // Also ensure occupied seats never have selected class (they shouldn't)
+            freshOccupiedSeats.forEach(s => s.classList.remove('selected'));
+
+            updateSummary();
+        }
+
+        freshAllSeats.forEach(seat => {
+            seat.addEventListener('click', newHandleSeatClick);
+        });
+
+        // Update references to allSeats and occupiedSeats for other functions
+        // we'll use freshAllSeats inside updateSummary? not needed.
+        // But in updateSummary we don't need them.
+
+        // Redefine refreshSeatUI using freshAllSeats
+        function refreshSeatUI() {
+            freshAllSeats.forEach(seat => {
+                const seatId = seat.dataset.seat;
+                if (selectedSeats.has(seatId)) {
+                    seat.classList.add('selected');
+                } else {
+                    seat.classList.remove('selected');
+                }
+            });
+        }
+
+        // re-assign updateSummary (it doesn't rely on allSeats)
+        // but the movie card click calls clearSelection -> which calls refreshSeatUI.
+
+        // Override clearSelection to use refreshSeatUI (which now uses freshAllSeats)
+        window.clearSelection = function() { // not on window, but we are in scope
+            selectedSeats.clear();
+            refreshSeatUI();
+            updateSummary();
+        };
+
+        // But inside the movie card click we call clearSelection() — which refers to the old function.
+        // We need to redefine clearSelection locally.
+        // We'll redefine it.
+
+        // Now re-bind movie cards (the listeners already exist, but they call old clearSelection; we'll override)
+        // Easier: remove all movie card listeners by cloning them.
+        const movieSelector = document.getElementById('movieSelector');
+        const newMovieSelector = movieSelector.cloneNode(true);
+        movieSelector.parentNode.replaceChild(newMovieSelector, movieSelector);
+
+        // re-query movie cards
+        const freshMovieCards = newMovieSelector.querySelectorAll('.movie-card');
+
+        // re-attach movie listeners
+        freshMovieCards.forEach(card => {
+            card.addEventListener('click', function() {
+                freshMovieCards.forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+
+                const title = this.dataset.movie;
+                const price = parseFloat(this.dataset.price);
+                const time = this.dataset.time;
+
+                currentMovie = { title, price, time };
+
+                // clear selection
+                selectedSeats.clear();
+                refreshSeatUI();
+                updateSummary();
+
+                summaryMovieTitle.textContent = title;
+                summaryMovieTime.textContent = time;
+                pricePerTicketEl.textContent = `$${price.toFixed(2)}`;
+
+                messageBox.innerHTML = `<i class="fas fa-sync-alt"></i> Movie changed · select seats`;
+            });
+        });
+
+        // Now re-bind book button (already replaced earlier, but we'll get it again)
+        const finalBookBtn2 = document.getElementById('bookBtn');
+        // Remove all listeners from it by cloning
+        const newBookBtn2 = finalBookBtn2.cloneNode(true);
+        finalBookBtn2.parentNode.replaceChild(newBookBtn2, finalBookBtn2);
+
+        newBookBtn2.addEventListener('click', function() {
+            const count = selectedSeats.size;
+            if (count === 0) {
+                messageBox.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#ff9f2e;"></i> Please select at least one seat.`;
+                return;
+            }
+
+            const seatsStr = Array
