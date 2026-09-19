@@ -1,673 +1,432 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NovaCart — e‑commerce service</title>
-  <!-- Google Font & Font Awesome (icons) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>small snake game</title>
+    <style>
+        /* minimal reset & centering */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
-      line-height: 1.5;
-      padding: 2rem 1.5rem;
-    }
+        body {
+            background: #1a2a1f;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
 
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-    }
+        .game-wrapper {
+            background: #0e1a12;
+            padding: 20px 20px 25px;
+            border-radius: 32px;
+            box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6), inset 0 0 8px #3a5e3a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
 
-    /* header / brand bar */
-    .top-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2.5rem;
-      gap: 1rem;
-    }
+        canvas {
+            display: block;
+            background: #1e2f1e;
+            border-radius: 18px;
+            box-shadow: inset 0 0 0 2px #3b5e3b, 0 8px 0 #0b130b;
+            width: 400px;
+            height: 400px;
+            image-rendering: crisp-edges; /* keep pixels sharp */
+        }
 
-    .logo-area {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
+        .status-bar {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+            padding: 0 8px;
+            color: #b8e0b8;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 0 #0a130a;
+        }
 
-    .logo-icon {
-      background: #0f172a;
-      color: black;
-      width: 44px;
-      height: 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 14px;
-      font-size: 1.6rem;
-    }
+        .score {
+            background: #0c180c;
+            padding: 8px 22px;
+            border-radius: 40px;
+            font-size: 1.3rem;
+            box-shadow: inset 0 2px 5px #00000055, 0 5px 0 #050a05;
+            color: #d4f0d4;
+        }
 
-    .logo-text {
-      font-size: 1.8rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      background: linear-gradient(135deg, #0f172a, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
+        .restart-btn {
+            background: #2f4f2f;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 24px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #e2ffe2;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #0b130b, 0 6px 10px black;
+            transition: all 0.05s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-    .cart-summary {
-      background: black;
-      padding: 0.6rem 1.2rem;
-      border-radius: 60px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.03);
-      display: flex;
-      align-items: center;
-      gap: 1.2rem;
-      border: 1px solid #e2e8f0;
-    }
+        .restart-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #0b130b, 0 6px 10px black;
+        }
 
-    .cart-icon-wrapper {
-      position: relative;
-    }
+        .restart-btn:hover {
+            background: #3e6b3e;
+        }
 
-    .cart-icon-wrapper i {
-      font-size: 1.5rem;
-      color: #1e293b;
-    }
-
-    .cart-badge {
-      position: absolute;
-      top: -8px;
-      right: -12px;
-      background: #ef4444;
-      color: white;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 0.2rem 0.5rem;
-      border-radius: 30px;
-      min-width: 20px;
-      text-align: center;
-    }
-
-    .cart-total {
-      font-weight: 700;
-      font-size: 1.2rem;
-      color: #0f172a;
-    }
-
-    .cart-total span {
-      font-weight: 400;
-      font-size: 0.9rem;
-      color: #64748b;
-      margin-left: 4px;
-    }
-
-    /* hero / service promise */
-    .service-badge {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2rem;
-      margin-bottom: 2.5rem;
-      background: white;
-      padding: 1rem 2rem;
-      border-radius: 80px;
-      box-shadow: 0 6px 14px rgba(0,0,0,0.02);
-      border: 1px solid #e9eef3;
-      justify-content: space-around;
-    }
-
-    .service-item {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-size: 0.95rem;
-      font-weight: 500;
-      color: #1e293b;
-    }
-
-    .service-item i {
-      color: #3b82f6;
-      font-size: 1.2rem;
-    }
-
-    /* section title */
-    .section-title {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin: 2rem 0 1.5rem 0;
-    }
-
-    .section-title h2 {
-      font-size: 1.8rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      color: #0b1120;
-    }
-
-    .section-title a {
-      text-decoration: none;
-      color: #3b82f6;
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: 0.2s;
-    }
-
-    .section-title a i {
-      font-size: 0.8rem;
-      margin-left: 4px;
-    }
-
-    .section-title a:hover {
-      color: #1e4fd9;
-    }
-
-    /* product grid */
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 1.8rem;
-      margin-bottom: 2.5rem;
-    }
-
-    .product-card {
-      background: white;
-      border-radius: 26px;
-      padding: 1.4rem 1.2rem 1.2rem;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.02), 0 8px 16px -6px rgba(0,0,0,0.02);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      border: 1px solid #edf2f7;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .product-card:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 25px 30px -12px rgba(0,0,0,0.1);
-      border-color: #dbe7f5;
-    }
-
-    .product-img {
-      background: #f1f5f9;
-      border-radius: 20px;
-      height: 150px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1rem;
-      color: #94a3b8;
-      font-size: 3.5rem;
-      transition: background 0.2s;
-      width: 100%;
-    }
-
-    .product-card:hover .product-img {
-      background: #e6edf6;
-    }
-
-    .product-name {
-      font-weight: 700;
-      font-size: 1.1rem;
-      margin-bottom: 0.3rem;
-      color: #0f172a;
-    }
-
-    .product-desc {
-      font-size: 0.85rem;
-      color: #64748b;
-      margin-bottom: 0.8rem;
-    }
-
-    .price-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: auto;
-    }
-
-    .price {
-      font-weight: 700;
-      font-size: 1.3rem;
-      color: #0f172a;
-    }
-
-    .price small {
-      font-size: 0.8rem;
-      font-weight: 400;
-      color: #64748b;
-      margin-left: 3px;
-    }
-
-    .add-btn {
-      background: #0f172a;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 0.7rem 1.2rem;
-      font-weight: 600;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      box-shadow: 0 6px 12px -6px rgba(15,23,42,0.3);
-      border: 1px solid #0f172a;
-    }
-
-    .add-btn i {
-      font-size: 0.9rem;
-    }
-
-    .add-btn:hover {
-      background: #1e293b;
-    }
-
-    .add-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* cart actions + checkout strip */
-    .cart-actions {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      background: white;
-      padding: 1.5rem 2rem;
-      border-radius: 60px;
-      border: 1px solid #eef3f8;
-      box-shadow: 0 8px 20px -8px rgba(0,0,0,0.05);
-      margin-top: 1rem;
-    }
-
-    .cart-items-list {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .cart-item-chip {
-      background: #f1f5f9;
-      padding: 0.5rem 1rem;
-      border-radius: 40px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-
-    .cart-item-chip i {
-      color: #64748b;
-      font-size: 0.8rem;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-
-    .cart-item-chip i:hover {
-      color: #ef4444;
-    }
-
-    .checkout-btn {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 40px;
-      padding: 0.9rem 2.4rem;
-      font-weight: 600;
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 10px 18px -8px #3b82f6;
-      border: 1px solid #3b82f6;
-    }
-
-    .checkout-btn:hover {
-      background: #2563eb;
-    }
-
-    .checkout-btn i {
-      font-size: 1rem;
-    }
-
-    .empty-cart-message {
-      color: #64748b;
-      font-size: 0.95rem;
-      font-style: italic;
-    }
-
-    /* toast notification */
-    .toast-message {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: #0f172a;
-      color: white;
-      padding: 1rem 2rem;
-      border-radius: 60px;
-      font-weight: 500;
-      box-shadow: 0 20px 30px -10px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      transform: translateY(0);
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
-      pointer-events: none;
-      z-index: 999;
-    }
-
-    .toast-message.show {
-      opacity: 1;
-      transform: translateY(-10px);
-      pointer-events: auto;
-    }
-
-    .toast-message i {
-      color: #4ade80;
-    }
-
-    /* footer / small print */
-    .footer-note {
-      margin-top: 3rem;
-      text-align: center;
-      color: #94a3b8;
-      font-size: 0.85rem;
-      border-top: 1px solid #e2e8f0;
-      padding-top: 2rem;
-    }
-
-    /* responsive touches */
-    @media (max-width: 600px) {
-      body {
-        padding: 1.2rem 1rem;
-      }
-
-      .service-badge {
-        border-radius: 40px;
-        padding: 1rem;
-        gap: 1rem;
-        justify-content: flex-start;
-      }
-
-      .cart-actions {
-        border-radius: 40px;
-        padding: 1.2rem;
-        flex-direction: column;
-        align-items: stretch;
-        gap: 1.2rem;
-      }
-
-      .checkout-btn {
-        justify-content: center;
-      }
-
-      .cart-items-list {
-        justify-content: center;
-      }
-
-      .top-bar {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .cart-summary {
-        justify-content: space-between;
-      }
-    }
-  </style>
+        .hint {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #7d9f7d;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <!-- header -->
-    <div class="top-bar">
-      <div class="logo-area">
-        <div class="logo-icon"><i class="fas fa-bag-shopping"></i></div>
-        <div class="logo-text">NovaCart</div>
-      </div>
-      <div class="cart-summary">
-        <div class="cart-icon-wrapper">
-          <i class="fas fa-cart-shopping"></i>
-          <span class="cart-badge" id="cartCount">0</span>
+    <div class="game-wrapper">
+        <canvas id="gameCanvas" width="400" height="400"></canvas>
+        <div class="status-bar">
+            <div class="score">🍎 <span id="scoreDisplay">0</span></div>
+            <button class="restart-btn" id="restartButton">↻ again</button>
         </div>
-        <div class="cart-total" id="cartTotalDisplay">$0 <span>USD</span></div>
-      </div>
+        <div class="hint">← ↑ → ↓   arrow keys</div>
     </div>
 
-    <!-- e‑commerce service guarantees -->
-    <div class="service-badge">
-      <div class="service-item"><i class="fas fa-truck-fast"></i> Free 2‑day shipping</div>
-      <div class="service-item"><i class="fas fa-rotate-left"></i> 30‑day returns</div>
-      <div class="service-item"><i class="fas fa-headset"></i> 24/7 support</div>
-      <div class="service-item"><i class="fas fa-lock"></i> Secure checkout</div>
-    </div>
+    <script>
+        (function() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            const scoreSpan = document.getElementById('scoreDisplay');
 
-    <!-- featured products -->
-    <div class="section-title">
-      <h2>Featured products</h2>
-      <a href="#">View all <i class="fas fa-arrow-right"></i></a>
-    </div>
+            // ---- game settings ----
+            const GRID_SIZE = 20;          // 20x20 cells
+            const CELL_SIZE = 20;          // px (400/20)
+            const TICK_INTERVAL_MS = 150;  // speed
 
-    <div class="product-grid" id="productGrid">
-      <!-- product cards will be injected via JS -->
-    </div>
+            // ---- game state ----
+            let snake = [];                // array of {x, y} from head to tail
+            let food = { x: 6, y: 10 };
+            let direction = 'RIGHT';       // current moving direction
+            let nextDirection = 'RIGHT';   // buffered next direction
+            let score = 0;
+            let gameOver = false;
+            let winFlag = false;           // to differentiate win message
 
-    <!-- cart footer / actions -->
-    <div class="cart-actions" id="cartActions">
-      <div class="cart-items-list" id="cartItemsContainer">
-        <!-- dynamic cart chips appear here -->
-        <span class="empty-cart-message" id="emptyCartMsg">Your cart is empty</span>
-      </div>
-      <button class="checkout-btn" id="checkoutBtn">
-        <i class="fas fa-credit-card"></i> Checkout
-      </button>
-    </div>
+            let gameInterval = null;
+            let gameRunning = false;
 
-    <div class="footer-note">
-      <i class="fas fa-shield-alt" style="margin-right: 6px;"></i> NovaCart e‑commerce service — demo interface. All transactions are simulated.
-    </div>
-  </div>
+            // ---- helper functions ----
+            function randomInt(max) {
+                return Math.floor(Math.random() * max);
+            }
 
-  <!-- toast element -->
-  <div class="toast-message" id="toast">
-    <i class="fas fa-check-circle"></i>
-    <span id="toastText">Item added to cart</span>
-  </div>
+            // generate new food at empty cell
+            function generateRandomFood() {
+                const totalCells = GRID_SIZE * GRID_SIZE;
+                if (snake.length >= totalCells) {
+                    // board is full → win condition
+                    return null;
+                }
 
-  <script>
-    (function() {
-      // ---------- sample product data ----------
-      const products = [
-        { id: 1, name: 'Aether Headphones', desc: 'Wireless, noise‑cancelling', price: 149.99, icon: 'fa-headphones' },
-        { id: 2, name: 'Nova Watch S2', desc: 'Fitness & health tracking', price: 229.50, icon: 'fa-clock' },
-        { id: 3, name: 'Lumen Smart Lamp', desc: 'Voice control, 16M colors', price: 59.99, icon: 'fa-lightbulb' },
-        { id: 4, name: 'Flux Backpack', desc: 'Water‑resistant, 20L', price: 89.00, icon: 'fa-bag-shopping' }
-      ];
+                // collect all free cells
+                const freeCells = [];
+                // using a Set for fast lookup
+                const snakeSet = new Set(snake.map(cell => `${cell.x},${cell.y}`));
 
-      // ---------- cart state ----------
-      let cart = [];   // array of { id, name, price, quantity, icon }
+                for (let y = 0; y < GRID_SIZE; y++) {
+                    for (let x = 0; x < GRID_SIZE; x++) {
+                        if (!snakeSet.has(`${x},${y}`)) {
+                            freeCells.push({ x, y });
+                        }
+                    }
+                }
 
-      // DOM elements
-      const productGrid = document.getElementById('productGrid');
-      const cartCountBadge = document.getElementById('cartCount');
-      const cartTotalDisplay = document.getElementById('cartTotalDisplay');
-      const cartItemsContainer = document.getElementById('cartItemsContainer');
-      const emptyCartMsg = document.getElementById('emptyCartMsg');
-      const toast = document.getElementById('toast');
-      const toastText = document.getElementById('toastText');
+                if (freeCells.length === 0) return null;
+                const randIndex = Math.floor(Math.random() * freeCells.length);
+                return freeCells[randIndex];
+            }
 
-      // ---------- helpers ----------
-      function showToast(message) {
-        toastText.textContent = message;
-        toast.classList.add('show');
-        setTimeout(() => {
-          toast.classList.remove('show');
-        }, 2200);
-      }
+            // reset everything
+            function resetGame() {
+                // stop any running interval
+                if (gameInterval) {
+                    clearInterval(gameInterval);
+                    gameInterval = null;
+                }
 
-      // format price with 2 decimals
-      function formatPrice(amount) {
-        return `$${amount.toFixed(2)}`;
-      }
+                // initial snake: length 3, placed horizontally
+                snake = [
+                    { x: 9, y: 10 }, // head
+                    { x: 8, y: 10 },
+                    { x: 7, y: 10 }
+                ];
 
-      // update header: cart count + total
-      function updateCartHeader() {
-        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-        const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        
-        cartCountBadge.textContent = totalItems;
-        cartTotalDisplay.innerHTML = `${formatPrice(totalPrice)} <span>USD</span>`;
-      }
+                direction = 'RIGHT';
+                nextDirection = 'RIGHT';
+                score = 0;
+                gameOver = false;
+                winFlag = false;
+                scoreSpan.textContent = '0';
 
-      // render cart items as chips inside cart-actions
-      function renderCartItems() {
-        if (cart.length === 0) {
-          // show empty message
-          cartItemsContainer.innerHTML = '<span class="empty-cart-message" id="emptyCartMsg">Your cart is empty</span>';
-          return;
-        }
+                // place food (ensure it's not on snake)
+                const newFood = generateRandomFood();
+                if (newFood) {
+                    food = newFood;
+                } else {
+                    // extremely rare on fresh board, but fallback
+                    food = { x: 15, y: 15 };
+                }
 
-        // build chips
-        let chipsHtml = '';
-        cart.forEach(item => {
-          chipsHtml += `
-            <div class="cart-item-chip" data-id="${item.id}">
-              <i class="fas ${item.icon}" style="color: #3b82f6; opacity: 0.8;"></i>
-              <span>${item.name} (${item.quantity})</span>
-              <i class="fas fa-times-circle remove-item" data-id="${item.id}" title="Remove one"></i>
-            </div>
-          `;
-        });
-        cartItemsContainer.innerHTML = chipsHtml;
+                gameRunning = true;
+                drawBoard();
+                startGameLoop();
+            }
 
-        // attach remove listeners to the × icons
-        document.querySelectorAll('.remove-item').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = Number(btn.dataset.id);
-            removeOneFromCart(id);
-          });
-        });
-      }
+            // draw everything
+            function drawBoard() {
+                ctx.clearRect(0, 0, 400, 400);
 
-      // full render: header + cart chips
-      function renderAll() {
-        updateCartHeader();
-        renderCartItems();
-      }
+                // draw subtle grid
+                ctx.strokeStyle = '#2b452b';
+                ctx.lineWidth = 0.8;
+                for (let i = 0; i <= GRID_SIZE; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(i * CELL_SIZE, 0);
+                    ctx.lineTo(i * CELL_SIZE, 400);
+                    ctx.stroke();
+                    ctx.moveTo(0, i * CELL_SIZE);
+                    ctx.lineTo(400, i * CELL_SIZE);
+                    ctx.stroke();
+                }
 
-      // ---------- cart operations ----------
-      function addToCart(productId) {
-        const product = products.find(p => p.id === productId);
-        if (!product) return;
+                // draw snake (head first, gradient effect)
+                snake.forEach((segment, idx) => {
+                    const isHead = idx === 0;
+                    const x = segment.x * CELL_SIZE;
+                    const y = segment.y * CELL_SIZE;
 
-        const existing = cart.find(item => item.id === productId);
-        if (existing) {
-          existing.quantity += 1;
-        } else {
-          cart.push({
-            id: product.id,
-            name: product.name,
-            price: product.price,
-            quantity: 1,
-            icon: product.icon
-          });
-        }
-        renderAll();
-        showToast(`${product.name} added to cart`);
-      }
+                    if (isHead) {
+                        // vibrant head
+                        ctx.fillStyle = '#8bc34a';
+                        ctx.shadowColor = '#c5e1a5';
+                        ctx.shadowBlur = 10;
+                        ctx.fillRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
+                        // eyes
+                        ctx.fillStyle = '#1e2f1e';
+                        ctx.shadowBlur = 0;
+                        // tiny eye dots (direction dependent, but simple)
+                        ctx.beginPath();
+                        ctx.arc(x + 6, y + 6, 2.5, 0, Math.PI * 2);
+                        ctx.arc(x + 14, y + 6, 2.5, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.fillStyle = '#ffffff';
+                        ctx.beginPath();
+                        ctx.arc(x + 5.5, y + 5.5, 1, 0, Math.PI * 2);
+                        ctx.arc(x + 13.5, y + 5.5, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        // body segment
+                        const intensity = 0.7 + (idx / snake.length) * 0.3;
+                        ctx.fillStyle = `rgb(70, 130, 70)`;
+                        ctx.shadowColor = '#3e6b3e';
+                        ctx.shadowBlur = 6;
+                        ctx.fillRect(x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4);
+                    }
+                });
 
-      function removeOneFromCart(productId) {
-        const index = cart.findIndex(item => item.id === productId);
-        if (index === -1) return;
+                // draw food (apple-like)
+                if (food) {
+                    const fx = food.x * CELL_SIZE;
+                    const fy = food.y * CELL_SIZE;
+                    ctx.shadowColor = '#e74c3c';
+                    ctx.shadowBlur = 12;
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.beginPath();
+                    ctx.arc(fx + CELL_SIZE / 2, fy + CELL_SIZE / 2, CELL_SIZE / 2 - 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    // leaf
+                    ctx.fillStyle = '#7ed957';
+                    ctx.shadowBlur = 8;
+                    ctx.beginPath();
+                    ctx.ellipse(fx + 12, fy + 5, 4, 2.5, 0.3, 0, Math.PI * 2);
+                    ctx.fill();
+                    // shine
+                    ctx.fillStyle = '#ffb3b3';
+                    ctx.shadowBlur = 5;
+                    ctx.beginPath();
+                    ctx.arc(fx + 9, fy + 9, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
 
-        const item = cart[index];
-        if (item.quantity > 1) {
-          item.quantity -= 1;
-          showToast(`Removed one ${item.name}`);
-        } else {
-          cart.splice(index, 1);
-          showToast(`${item.name} removed from cart`);
-        }
-        renderAll();
-      }
+                // reset shadow
+                ctx.shadowBlur = 0;
+                ctx.shadowColor = 'transparent';
 
-      // (optional) clear cart – used by checkout demo
-      function clearCart() {
-        if (cart.length === 0) {
-          showToast('Your cart is already empty');
-          return;
-        }
-        cart = [];
-        renderAll();
-        showToast('Order placed! (demo) Thank you ❤️');
-      }
+                // game over / win overlay
+                if (gameOver || winFlag) {
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    ctx.fillRect(0, 0, 400, 400);
 
-      // ---------- build product grid ----------
-      function renderProducts() {
-        let html = '';
-        products.forEach(p => {
-          html += `
-            <div class="product-card" data-product-id="${p.id}">
-              <div class="product-img">
-                <i class="fas ${p.icon}"></i>
-              </div>
-              <div class="product-name">${p.name}</div>
-              <div class="product-desc">${p.desc}</div>
-              <div class="price-row">
-                <div class="price">${formatPrice(p.price)}<small>USD</small></div>
-                <button class="add-btn" data-id="${p.id}">
-                  <i class="fas fa-plus"></i> Add
-                </button>
-              </div>
-            </div>
-          `;
-        });
-        productGrid.innerHTML = html;
+                    ctx.font = 'bold 26px "Segoe UI", Roboto, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    if (winFlag) {
+                        ctx.fillStyle = '#d4ed4e';
+                        ctx.shadowColor = '#8bc34a';
+                        ctx.shadowBlur = 18;
+                        ctx.fillText('✨ YOU WIN! ✨', 200, 200);
+                    } else {
+                        ctx.fillStyle = '#f2b3b3';
+                        ctx.shadowColor = '#b71c1c';
+                        ctx.shadowBlur = 16;
+                        ctx.fillText('GAME OVER', 200, 200);
+                    }
+                    ctx.shadowBlur = 0;
+                }
+            }
 
-        // attach event listeners to all "Add" buttons
-        document.querySelectorAll('.add-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const id = Number(btn.dataset.id);
-            addToCart(id);
-          });
-        });
-      }
+            // check collisions and update snake position
+            function gameTick() {
+                if (!gameRunning) return;
+                if (gameOver || winFlag) return;
 
-      // ---------- checkout button demo ----------
-      document.getElementById('checkoutBtn').addEventListener('click', () => {
-        if (cart.length === 0) {
-          showToast('Your cart is empty. Add some products.');
-          return;
-        }
-        // simulate successful order
-        clearCart();
-      });
+                // apply buffered direction (no 180 reversal)
+                if (nextDirection === 'UP' && direction !== 'DOWN') direction = 'UP';
+                else if (nextDirection === 'DOWN' && direction !== 'UP') direction = 'DOWN';
+                else if (nextDirection === 'LEFT' && direction !== 'RIGHT') direction = 'LEFT';
+                else if (nextDirection === 'RIGHT' && direction !== 'LEFT') direction = 'RIGHT';
 
-      // ---------- initial render ----------
-      renderProducts();
-      renderAll();   // sets empty cart message and zero totals
+                // compute new head
+                const head = snake[0];
+                let newHead = { ...head };
 
-      // ensure if cart is empty the empty message stays (already handled)
-    })();
-  </script>
+                switch (direction) {
+                    case 'RIGHT': newHead.x += 1; break;
+                    case 'LEFT':  newHead.x -= 1; break;
+                    case 'UP':    newHead.y -= 1; break;
+                    case 'DOWN':  newHead.y += 1; break;
+                }
+
+                // check wall collision
+                if (newHead.x < 0 || newHead.x >= GRID_SIZE || newHead.y < 0 || newHead.y >= GRID_SIZE) {
+                    gameOver = true;
+                    gameRunning = false;
+                    if (gameInterval) {
+                        clearInterval(gameInterval);
+                        gameInterval = null;
+                    }
+                    drawBoard();
+                    return;
+                }
+
+                // check food collision
+                const isEating = (newHead.x === food.x && newHead.y === food.y);
+
+                // build new snake array
+                let newSnake = [newHead, ...snake];
+
+                if (!isEating) {
+                    // remove tail
+                    newSnake.pop();
+                }
+
+                // check self-collision (new head vs body of newSnake[1..])
+                const headCollision = newSnake.slice(1).some(segment => segment.x === newHead.x && segment.y === newHead.y);
+                if (headCollision) {
+                    gameOver = true;
+                    gameRunning = false;
+                    if (gameInterval) {
+                        clearInterval(gameInterval);
+                        gameInterval = null;
+                    }
+                    drawBoard();
+                    return;
+                }
+
+                // update snake
+                snake = newSnake;
+
+                if (isEating) {
+                    score++;
+                    scoreSpan.textContent = score;
+
+                    // generate new food
+                    const newFood = generateRandomFood();
+                    if (newFood) {
+                        food = newFood;
+                    } else {
+                        // board full → win!
+                        winFlag = true;
+                        gameRunning = false;
+                        if (gameInterval) {
+                            clearInterval(gameInterval);
+                            gameInterval = null;
+                        }
+                        drawBoard();
+                        return;
+                    }
+                }
+
+                drawBoard();
+            }
+
+            function startGameLoop() {
+                if (gameInterval) clearInterval(gameInterval);
+                gameInterval = setInterval(() => {
+                    gameTick();
+                }, TICK_INTERVAL_MS);
+            }
+
+            // ---- keyboard control ----
+            function handleKeydown(e) {
+                const key = e.key;
+                // prevent arrow keys from scrolling
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
+                    e.preventDefault();
+                }
+
+                if (!gameRunning || gameOver || winFlag) return;
+
+                switch (key) {
+                    case 'ArrowUp':    nextDirection = 'UP'; break;
+                    case 'ArrowDown':  nextDirection = 'DOWN'; break;
+                    case 'ArrowLeft':  nextDirection = 'LEFT'; break;
+                    case 'ArrowRight': nextDirection = 'RIGHT'; break;
+                    default: return;
+                }
+            }
+
+            // ---- restart ----
+            function restartGame() {
+                resetGame();
+            }
+
+            // ---- initialization ----
+            window.addEventListener('load', () => {
+                resetGame(); // sets snake, food, starts loop
+                window.addEventListener('keydown', handleKeydown);
+                document.getElementById('restartButton').addEventListener('click', restartGame);
+            });
+
+            // clean up interval if page unloads (optional)
+            window.addEventListener('beforeunload', () => {
+                if (gameInterval) clearInterval(gameInterval);
+            });
+        })();
+    </script>
 </body>
 </html>
